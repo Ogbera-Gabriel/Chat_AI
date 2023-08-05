@@ -7,6 +7,7 @@ const chatContainer = document.querySelector('#chat_container');
 let loadInterval;
 
 function loader(element) {
+  // ... (function implementation)
   element.textContent = '';
 
   loadInterval = setInterval(() => {
@@ -19,6 +20,7 @@ function loader(element) {
 }
 
 function typeText(element, text) {
+  // ... (function implementation)
   let index = 0;
 
   let interval = setInterval(() => {
@@ -32,6 +34,7 @@ function typeText(element, text) {
 }
 
 function generateUniqueId() {
+  // ... (function implementation)
   const timestamp = Date.now();
   const randomNumber = Math.random();
   const hexadecimalString = randomNumber.toString(16);
@@ -40,7 +43,8 @@ function generateUniqueId() {
   return `id-${timestamp}-${hexadecimalString}`;
 }
 
-function chatStripe (isAi, value, uniqueId) {
+function chatStripe(isAi, value, uniqueId) {
+  // ... (function implementation)
   return (
     `
      <div class='wrapper ${isAi && 'ai'}'>
@@ -63,51 +67,49 @@ const handleSubmit = async (e) => {
 
   const data = new FormData(form);
 
-  //user chat stripe
+  // user chat stripe
   chatContainer.innerHTML += chatStripe(false, data.get('prompt'));
   form.reset();
 
-  //bot chat stripe
-
+  // bot chat stripe
   const uniqueId = generateUniqueId();
   chatContainer.innerHTML += chatStripe(true, ' ', uniqueId);
 
-  chatContainer.scrollTop=chatContainer.scrollHeight;// put new message in view
+  chatContainer.scrollTop = chatContainer.scrollHeight; // put new message in view
 
   const messageDiv = document.getElementById(uniqueId);
 
   loader(messageDiv);
 
-  //fetch data from sever => bot's reponse
-  const reponse = await fetch('https://ai-sever-1-2.onrender.com',{
+  // fetch data from server => bot's response
+  const response = await fetch('https://ai-server-1-2.onrender.com', {
     method: 'POST',
     headers: {
-      'Content-Type' : 'application/json'
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      prompt: data.get('prompt') 
+      prompt: data.get('prompt')
     })
-  })
+  });
 
   clearInterval(loadInterval);
   messageDiv.innerHTML = '';
 
-
-  if (reponse.ok) {
-    const data = await reponse.json();
-    const parsedData = data.bot.trim();
+  if (response.ok) {
+    const responseData = await response.json();
+    const parsedData = responseData.bot.trim();
 
     typeText(messageDiv, parsedData);
   } else {
-    const err = await reponse.text();
+    const errorMessage = await response.text();
     messageDiv.innerHTML = 'Something went wrong';
-    alert(err);
+    alert(errorMessage);
   }
-}
+};
 
 form.addEventListener('submit', handleSubmit);
 form.addEventListener('keyup', (e) => {
-  if (e.keyCode=== 13){
+  if (e.keyCode === 13) {
     handleSubmit(e);
   }
-})
+});
